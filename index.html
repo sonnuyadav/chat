@@ -12,9 +12,21 @@
 
     <div class="container">
         <div class="row">
-            <div class="col-md-12 offset-md-3 col-sm-12">
+            <div class="col-md-6 offset-md-3 col-sm-12">
                 <h1>Chat application</h1>
                 <button id="clear" class="btn btn-danger">Clear</button>
+
+                <div id="status"></div>
+
+                <div id="chat">
+                    <input type="text" id="username" class="form-control" placeholder="Enter name">
+                </div>
+                <br>
+                <div class="card">
+                    <div id="messages" class="card-block"></div>
+                </div>
+                <br>
+                <textarea id="textarea" class="form-control" placeholder="Enter message"></textarea>
             </div>
         </div>
     </div>
@@ -26,26 +38,71 @@
                     return document.getElementById(id);
                 }
                 //get Status
+            var status = element('status');
+            var messages = element('messages');
+            var textarea = element('textarea');
+            var username = element('username');
+            var clearBtn = element('clear');
 
-            var message = element('message');
+            // Set default status
+            var statusDefault = status.textContent;
 
+            var setStatus = function(s) {
+                // Set status
+                status.textContent = s;
 
-
-
+                if (s !== statusDefault) {
+                    var delay = setTimeout(function() {
+                        setStatus(statusDefault);
+                    }, 4000);
+                }
+            }
 
             //connect with Socket
-
             var socket = io.connect("http://localhost:4000");
             if (socket != undefined) {
                 console.log("Socket is connected--");
-
+                //Handle list of data
                 socket.on('output', function(data) {
-
-                    console.log("Socket data", data);
-
+                        if (data.length) {
+                            for (var i = 0; i < data.length; i++) {
+                                //Send message to div 
+                                var message = document.createElement('div');
+                                message.setAttribute('class', 'chat-message');
+                                message.textContent = data[i].name + ": " + data[i].message;
+                                messages.appendChild(message);
+                                messages.insertBefore(message, messages.firstChild);
+                            }
+                        }
+                    })
+                    // Handle status
+                socket.on('status', function(data) {
+                    //get status message
+                    setStatus((typeof data === 'object') ? data.message : data);
+                    if (data.clear) {
+                        textarea.value = '';
+                    }
                 })
 
+                //Handle input
+                textarea.addEventListener('keydown', function(event) {
+                    if (event.which === 13 && event.shiftKey == false) {
+                        //emit to server
+                        socket.emit('input', {
+                            name: username.value,
+                            message: textarea.value
+                        });
+                        event.preventDefault();
+                    }
+                });
 
+                //Handle Clear Button
+                clearBtn.addEventListener('click', function() {
+                    socket.emit('clear');
+                })
+                socket.on('cleared', function() {
+                    messages.textContent = '';
+                });
             }
         })();
     </script>
