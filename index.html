@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application Using NodeJs amd MongoDb</title>
+</head>
+<body>
+    
+<div id="message">
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>    
+
+<script>
+    (function(){
+        var element = function(id){
+            return document.getElementById(id);
+        }
+        //get Status
+
+        var message = element('message');
+
+
+
+
+
+        //connect with Socket
+
+        var socket = io.connect("127.0.0.1:4000");
+        if(socket != undefined){
+            console.log("Socket is connected");
+
+            socket.on('output', function(data){
+                console.log("Socket data",data);
+
+            })
+
+
+        }
+    })();
+</script>
+</body>
+</html>

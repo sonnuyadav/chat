@@ -1,31 +1,34 @@
 const mongo = require('mongodb').MongoClient;
-const client = require('socket.io').listen(4000).sockets;
+const socketClient = require('socket.io').listen(4000).sockets;
 //connect mongodb
-
-mongo.connect('mongodb://127.0.0.1/chat',{ useNewUrlParser: true, useUnifiedTopology: true }, function(err,db){
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database Name
+const dbName = 'chats';
+mongo.connect(url,{ useNewUrlParser: true, useUnifiedTopology: true }, function(err,dbResponse){
     if(err){
         throw err;
        }
       console.log("Mongodb connected!!!");
 
+      const db = dbResponse.db(dbName);
+      const chatTable = db.collection('chat'); 
       //Connect to socket.io
-
-      client.on('connection', function(){
-          let chat = db.collection('chats');
-
+      socketClient.on('connection', function(socket){
           //create function to send status
           sendStatus = function(s){
               socket.emit('status',s);
           }
-      })
+      
 
     //Get chats from mongo collection
-    chat.find().limit(100).sort({_id:1}).toArray(function(err,rest){
+    db.collection('chat').find().limit(100).sort({_id:1}).toArray(function(err,rest){
         if(err){
             throw err;
         }
+        console.log("=====Rest data",rest)
         //Emit the message to the client
-        socket.emit('output', res);
+        //socket.emit('output', rest);
     });
 
     //Handle input events
@@ -39,8 +42,8 @@ mongo.connect('mongodb://127.0.0.1/chat',{ useNewUrlParser: true, useUnifiedTopo
 
         }else{
             //Insert data in database
-            chat.insert({name:name, message:message}, function(){
-                client.emit('output', [data]);
+            db.collection('chat').insert({name:name, message:message}, function(){
+                socketClient.emit('output', [data]);
 
                 //Send status object
                 sendStatus({
@@ -53,10 +56,12 @@ mongo.connect('mongodb://127.0.0.1/chat',{ useNewUrlParser: true, useUnifiedTopo
     //handle clear
     socket.on('clear', function(data){
         //Remove all chat from the collection
-        chat.remove({}, function(){
+        db.collection('chat').remove({}, function(){
             //emit cleared
             socket.emit('cleared')
         })
     });
 
+    //close socket emit
+});
 });
