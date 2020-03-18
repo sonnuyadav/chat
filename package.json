@@ -2,9 +2,9 @@
   "name": "chat",
   "version": "1.0.0",
   "description": "Chat application using nodejs | mongodb",
-  "main": "server.js",
+  "main": "serverEs5.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node serverEs5.js"
   },
   "author": "",
   "license": "ISC",

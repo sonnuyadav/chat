@@ -1,18 +1,15 @@
 const mongo = require('mongodb').MongoClient;
 const socketClient = require('socket.io').listen(4000).sockets;
+const config  = require('./systemConfig.json');
+
 //connect mongodb
-// Connection URL
-const url = 'mongodb://localhost:27017';
-// Database Name
-const dbName = 'chats';
-mongo.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, dbResponse) {
+mongo.connect(config.mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, dbResponse) {
     if (err) {
         throw err;
     }
     console.log("Mongodb connected!!!");
 
-    const db = dbResponse.db(dbName);
-    const chatTable = db.collection('chat');
+    const db = dbResponse.db(config.dataBase);
     //Connect to socket.io
     socketClient.on('connection', function(socket) {
         //create function to send status

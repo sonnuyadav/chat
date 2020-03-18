@@ -2,7 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 const socketClient = require('socket.io').listen(4000).sockets;
 //connect mongodb
 // Connection URL
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://192.168.1.5:27017';
 // Database Name
 const dbName = 'chats';
 (async() => {
@@ -31,8 +31,14 @@ const dbName = 'chats';
                     sendStatus('Please enter the name and message')
 
                 } else {
+
+                    console.log("MEssage =========Value",data)
                     //Insert data in database
-                    db.collection('chat').insertOne({ name: name, message: message }, function() {
+                    db.collection('chat').insertOne({ name: name, message: message }, function(err,res) {
+                        if(err){
+                            console.log("Error in query",err)
+                        }
+                        console.log("MEssage ========res=Value",res)
                         socketClient.emit('output', [data]);
                         //Send status object
                         sendStatus({

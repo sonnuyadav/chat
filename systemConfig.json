@@ -1,3 +1,4 @@
 {
-    "database": "locat"
+    "mongoUrl": "mongodb://localhost:27017",
+    "dataBase":"chats"
 }
